@@ -8,6 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
@@ -58,6 +62,54 @@ public class BasicSpringDataJpaRepositorySd18202Application implements CommandLi
         List<Product> foundProducts4b = repository.findByNameVersion4b("Product 1002");
         foundProducts4b.forEach(p -> logger.info(p.toString()));
 
+        //5. Pagination
+        int pageNo = 0; //
+        int pageSize = 5;
 
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+
+        // get all info via page
+        Page<Product> page = repository.findAll(pageable);
+
+        List<Product> products = page.getContent();
+        products.forEach(p -> logger.info(p.toString()));
+
+        // total pages
+        int totalPages = page.getTotalPages();
+        logger.info("Total pages: " + totalPages);
+
+        // total elements
+        long totalElements = page.getTotalElements();
+        logger.info("Total products: " + totalElements);
+
+        // size
+        int size = page.getSize();
+
+        // last
+        boolean isLast = page.isLast();
+        // first
+        boolean isFirst = page.isFirst();
+
+        // 6. Sorting
+//        List<Product> products1 =
+//                repository.findAll(Sort.by("name").descending());
+//        products1.forEach(p -> logger.info(p.toString()));
+
+
+        String sortBy = "name";
+        String sortDir = "desc";
+
+        Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name())
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        List<Product> products1 = repository.findAll(sort);
+        products1.forEach(p -> logger.info(p.toString()));
+
+        // 7. Pagination + sorting
+        Page<Product> products2 =
+                repository.findAll(PageRequest.of(pageNo, pageSize, sort));
+
+        products2.forEach(p -> logger.info(p.getName()));
     }
 }
